@@ -1,0 +1,3 @@
+approvers: [bengal, pfeifferj]
+approvals-required: 1
+implementation-repos: [netfyr/specs]
