@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Validate a SpecDoc spec repo: roles.yml schema + spec.md layout.
+"""Validate a SpecDoc spec repo: roles.yml schema + spec layout.
 
 Mirrors the assumptions the spec-board makes so a hand-authored PR can't
 break the board. Run locally with `python3 .github/validate.py`.
@@ -11,7 +11,7 @@ import sys
 import yaml
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
-SPEC_PATH = re.compile(r"^specs/(?:[^/]+/)?\d{3}-[^/]+/spec\.md$")
+SPEC_PATH = re.compile(r"^(?:[^/]+/)?\d{3}-[^/]+\.md$")
 CRITIC = re.compile(r"\{(\+\+|--|>>|~~|==)")
 
 errors = []
@@ -78,10 +78,12 @@ def check_codeowners():
 
 
 def check_specs():
-    for spec in ROOT.glob("specs/**/spec.md"):
+    for spec in ROOT.glob("**/[0-9]*.md"):
         rel = spec.relative_to(ROOT).as_posix()
+        if rel.startswith("."):
+            continue
         if not SPEC_PATH.match(rel):
-            errors.append(f"{rel}: path must be specs/[category/]NNN-slug/spec.md")
+            errors.append(f"{rel}: path must be [area/]NNN-slug.md at the repo apex")
         text = spec.read_text()
         if text.lstrip().startswith("---"):
             errors.append(f"{rel}: leftover frontmatter; merged specs carry none")

@@ -2,10 +2,10 @@
 """Self-check for validate.py: run `python3 .github/test_validate.py`."""
 from validate import CRITIC, SPEC_PATH, validate_codeowners, validate_roles
 
-for good in ("specs/003-foo/spec.md", "specs/cat/003-foo/spec.md"):
+for good in ("003-foo.md", "cat/003-foo.md"):
     assert SPEC_PATH.match(good), f"should accept {good}"
-for bad in ("specs/03-foo/spec.md", "specs/003-foo/design.md",
-            "specs/a/b/003-foo/spec.md", "specs/0034-foo/spec.md"):
+for bad in ("03-foo.md", "0034-foo.md", "003-.md",
+            "a/b/003-foo.md", "specs/003-foo/spec.md"):
     assert not SPEC_PATH.match(bad), f"should reject {bad}"
 
 assert CRITIC.search("text {++add++}"), "should flag CriticMarkup"
