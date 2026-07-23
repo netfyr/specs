@@ -1,0 +1,2 @@
+# Owners mirror roles.yml approvers; validate.py fails CI if they drift.
+* @bengal @pfeifferj

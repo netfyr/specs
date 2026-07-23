@@ -32,8 +32,26 @@ def validate_roles(roles):
     return errs
 
 
+def validate_codeowners(roles, text):
+    approvers = roles.get("approvers")
+    if not isinstance(approvers, list):
+        return []  # validate_roles already flags a bad approvers list
+    owners = []
+    for line in text.splitlines():
+        line = line.split("#", 1)[0].strip()
+        if line.startswith("* "):
+            owners = line.split()[1:]
+    if set(owners) != {f"@{a}" for a in approvers}:
+        return [f"CODEOWNERS: '*' owners must match roles.yml approvers ({sorted(approvers)})"]
+    return []
+
+
+def find_roles():
+    return next((ROOT / p for p in ("roles.yml", ".specs/roles.yml") if (ROOT / p).exists()), None)
+
+
 def check_roles():
-    path = next((ROOT / p for p in ("roles.yml", ".specs/roles.yml") if (ROOT / p).exists()), None)
+    path = find_roles()
     if not path:
         errors.append("roles.yml missing (root or .specs/)")
         return
@@ -43,6 +61,20 @@ def check_roles():
         errors.append(f"{path.name}: invalid YAML: {e}")
         return
     errors.extend(validate_roles(roles))
+
+
+def check_codeowners():
+    path = find_roles()
+    co = ROOT / ".github" / "CODEOWNERS"
+    if not path or not co.exists():
+        if not co.exists():
+            errors.append("CODEOWNERS missing (.github/CODEOWNERS)")
+        return
+    try:
+        roles = yaml.safe_load(path.read_text()) or {}
+    except yaml.YAMLError:
+        return  # check_roles already flags the YAML error
+    errors.extend(validate_codeowners(roles, co.read_text()))
 
 
 def check_specs():
@@ -61,6 +93,7 @@ def check_specs():
 
 if __name__ == "__main__":
     check_roles()
+    check_codeowners()
     check_specs()
     if errors:
         print("\n".join(f"FAIL {e}" for e in errors), file=sys.stderr)

@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """Self-check for validate.py: run `python3 .github/test_validate.py`."""
-from validate import CRITIC, SPEC_PATH, validate_roles
+from validate import CRITIC, SPEC_PATH, validate_codeowners, validate_roles
 
 for good in ("specs/003-foo/spec.md", "specs/cat/003-foo/spec.md"):
     assert SPEC_PATH.match(good), f"should accept {good}"
@@ -16,5 +16,12 @@ assert not validate_roles({"approvers": ["a", "b"]}), "default (1) must pass"
 assert not validate_roles({"approvers": ["a", "b"], "approvals-required": 2}), "2 of 2 must pass"
 assert validate_roles({"approvers": ["a"], "approvals-required": 2}), "over-count must fail"
 assert validate_roles({"approvers": []}), "empty approvers must fail"
+
+R = {"approvers": ["ann", "bob"]}
+assert not validate_codeowners(R, "* @ann @bob\n"), "matching owners must pass"
+assert not validate_codeowners(R, "* @bob @ann\n"), "owner order must not matter"
+assert validate_codeowners(R, "* @ann\n"), "missing owner must fail"
+assert validate_codeowners(R, "# no rule\n"), "absent '*' rule must fail"
+assert not validate_codeowners({"approvers": "bad"}, "* @x\n"), "defers to roles check on bad approvers"
 
 print("ok")
