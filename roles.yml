@@ -2,3 +2,4 @@ approvers: [bengal, pfeifferj]
 approvals-required: 1
 implementation-repos: [netfyr/netfyr]
 specs-dir: .
+areas: [workspace, testing, core, api, plugins, cli, migration, observability]
