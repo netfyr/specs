@@ -1,4 +1,4 @@
-approvers: [bengal, pfeifferj]
+approvers: [bengal, pfeifferj, rajeshrah22]
 approvals-required: 1
 implementation-repos: [netfyr/netfyr]
 specs-dir: .
