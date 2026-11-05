@@ -1,0 +1,58 @@
+name: Spec submission policy
+
+on:
+  pull_request_target:
+    types: [opened, reopened]
+
+permissions:
+  pull-requests: write
+
+concurrency:
+  group: spec-submission-${{ github.event.pull_request.number }}
+  cancel-in-progress: false
+
+jobs:
+  redirect:
+    if: github.repository == 'netfyr/specs'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3 # v9.0.0
+        with:
+          script: |
+            const pull = {
+              ...context.repo,
+              pull_number: context.payload.pull_request.number,
+            };
+            const { data: pr } = await github.rest.pulls.get(pull);
+            if (pr.state !== 'open') return;
+
+            const isNetfyrBot = pr.user.type === 'Bot' && pr.user.id === 308292487;
+            const isOrgMember = pr.user.type === 'User' &&
+              ['MEMBER', 'OWNER'].includes(pr.author_association);
+            if (isNetfyrBot || isOrgMember) return;
+
+            const issue = { ...context.repo, issue_number: pr.number };
+            const marker = '<!-- netfyr-spec-submission-policy -->';
+            const comments = await github.paginate(github.rest.issues.listComments, {
+              ...issue,
+              per_page: 100,
+            });
+            const alreadyExplained = comments.some(comment =>
+              comment.user?.type === 'Bot' &&
+              comment.user?.login === 'github-actions[bot]' &&
+              comment.body?.includes(marker));
+            if (!alreadyExplained) {
+              await github.rest.issues.createComment({
+                ...issue,
+                body: [
+                  marker,
+                  'netfyr specifications are proposed and reviewed in ' +
+                    '[SpecDoc](https://specs.josie.cloud/?ns=netfyr%2Fspecs). ' +
+                    'Please submit your proposal or revision there. After approval, ' +
+                    'SpecDoc opens the publication pull request.',
+                  '[How spec review works](https://specdoc.josie.cloud/spec-lifecycle/)',
+                ].join('\n\n'),
+              });
+            }
+            await github.rest.pulls.update({ ...pull, state: 'closed' });
