@@ -1,5 +1,6 @@
 approvers: [bengal, pfeifferj, rajeshrah22]
 approvals-required: 1
 implementation-repos: [netfyr/netfyr]
+feedback-bot: net-qwen
 specs-dir: .
 areas: [workspace, testing, core, api, plugins, cli, migration, observability]
