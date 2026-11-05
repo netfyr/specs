@@ -91,7 +91,7 @@ class SubmissionPolicy(unittest.TestCase):
         comment = result["calls"][2][1]
         self.assertEqual((comment["owner"], comment["repo"], comment["issue_number"]),
                          ("netfyr", "specs", 42))
-        self.assertIn("https://specs.josie.cloud/?ns=netfyr%2Fspecs", comment["body"])
+        self.assertIn("https://specs.netfyr.io/?ns=netfyr%2Fspecs", comment["body"])
         self.assertIn("proposal or revision", comment["body"])
         self.assertEqual(result["calls"][-1], ["close", {
             "owner": "netfyr", "repo": "specs", "pull_number": 42, "state": "closed",
