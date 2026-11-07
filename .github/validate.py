@@ -13,19 +13,50 @@ import yaml
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 SPEC_PATH = re.compile(r"^(?:[^/]+/)?\d{3}-[^/]+\.md$")
 CRITIC = re.compile(r"\{(\+\+|--|>>|~~|==)")
+ACCOUNT_ID = re.compile(r"[1-9][0-9]{0,19}")
+LOGIN = re.compile(r"[A-Za-z0-9][A-Za-z0-9-]{0,38}")
 
 errors = []
 
 
+def principal_logins(entries):
+    if not isinstance(entries, list):
+        return None
+    ids, logins = set(), set()
+    result = []
+    for entry in entries:
+        if not isinstance(entry, dict) or set(entry) != {"id", "login"}:
+            return None
+        account_id, login = entry["id"], entry["login"]
+        if (not isinstance(account_id, str) or not ACCOUNT_ID.fullmatch(account_id)
+                or not isinstance(login, str) or not LOGIN.fullmatch(login)
+                or account_id in ids or login.lower() in logins):
+            return None
+        ids.add(account_id)
+        logins.add(login.lower())
+        result.append(login)
+    return result
+
+
 def validate_roles(roles):
+    if not isinstance(roles, dict):
+        return ["roles.yml: expected a mapping"]
     errs = []
-    approvers = roles.get("approvers")
-    if not isinstance(approvers, list) or not approvers or not all(isinstance(a, str) for a in approvers):
-        errs.append("roles.yml: approvers must be a non-empty list of logins")
-        approvers = approvers if isinstance(approvers, list) else []
+    approvers = principal_logins(roles.get("approvers"))
+    if not approvers:
+        errs.append("roles.yml: approvers must be a non-empty list of distinct {id, login} accounts with quoted numeric IDs")
+    authors = principal_logins(roles.get("authors", []))
+    if authors is None:
+        errs.append("roles.yml: authors must be a list of distinct {id, login} accounts with quoted numeric IDs")
+    if approvers is not None and authors is not None:
+        accounts = {(person["id"], person["login"].lower())
+                    for person in roles["approvers"] + roles.get("authors", [])}
+        if (len({account_id for account_id, _ in accounts}) != len(accounts)
+                or len({login for _, login in accounts}) != len(accounts)):
+            errs.append("roles.yml: account IDs and logins must agree across approvers and authors")
     req = roles.get("approvals-required", 1)
-    if not isinstance(req, int) or req < 1 or req > len(approvers):
-        errs.append(f"roles.yml: approvals-required must be an int in 1..{len(approvers)}")
+    if type(req) is not int or req < 1 or (approvers is not None and req > len(approvers)):
+        errs.append("roles.yml: approvals-required must be a positive integer no larger than the approver count")
     repos = roles.get("implementation-repos", [])
     if not isinstance(repos, list) or not all(re.match(r"^[^/]+/[^/]+$", str(r)) for r in repos):
         errs.append("roles.yml: implementation-repos must be a list of owner/repo")
@@ -33,8 +64,8 @@ def validate_roles(roles):
 
 
 def validate_codeowners(roles, text):
-    approvers = roles.get("approvers")
-    if not isinstance(approvers, list):
+    approvers = principal_logins(roles.get("approvers")) if isinstance(roles, dict) else None
+    if not approvers:
         return []  # validate_roles already flags a bad approvers list
     owners = []
     for line in text.splitlines():

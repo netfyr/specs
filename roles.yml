@@ -1,6 +1,38 @@
-approvers: [bengal, pfeifferj, rajeshrah22]
-approvals-required: 1
-implementation-repos: [netfyr/netfyr]
-feedback-bot: net-qwen
-specs-dir: .
-areas: [workspace, testing, core, api, plugins, cli, migration, observability]
+# Generated from https://github.com/netfyr/infra/blob/main/terraform/github-org/governance.auto.tfvars.json
+"approvers":
+- "id": "110632"
+  "login": "bengal"
+- "id": "22047071"
+  "login": "pfeifferj"
+- "id": "109564679"
+  "login": "rajeshrah22"
+"approvals-required": 1
+"implementation-repos":
+- "netfyr/netfyr"
+"specs-dir": "."
+"authors":
+- "id": "110632"
+  "login": "bengal"
+- "id": "22047071"
+  "login": "pfeifferj"
+- "id": "109564679"
+  "login": "rajeshrah22"
+- "id": "48308451"
+  "login": "smyle10"
+- "id": "197720"
+  "login": "tyll"
+"feedback-bot": "net-qwen"
+"areas":
+- "workspace"
+- "testing"
+- "core"
+- "api"
+- "plugins"
+- "cli"
+- "migration"
+- "observability"
+"auto-merge":
+  "method": "merge"
+  "checks":
+  - "name": "validate"
+    "app-id": 15368
