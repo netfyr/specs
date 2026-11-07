@@ -1,2 +1,2 @@
-# Owners mirror roles.yml approvers; validate.py fails CI if they drift.
+# Generated from https://github.com/netfyr/infra/blob/main/terraform/github-org/governance.auto.tfvars.json
 * @bengal @pfeifferj @rajeshrah22
