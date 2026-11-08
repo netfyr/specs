@@ -21,7 +21,7 @@
   "login": "smyle10"
 - "id": "197720"
   "login": "tyll"
-"feedback-bot": "net-qwen"
+"feedback-bot": "net-deepseek"
 "areas":
 - "workspace"
 - "testing"
