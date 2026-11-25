@@ -1,7 +1,8 @@
 Design specifications for netfyr.
 
-Specs land at the repo root as `NNN-slug.md` (or `area/NNN-slug.md`). They're
-proposed and reviewed via SpecDoc and merged here once approved.
+Feature specs are published as `NNN-slug.md` or `area/NNN-slug.md`.
+Top-level specs such as the [project philosophy](netfyr-philosophy.md) live
+at the repository root.
 
 Submit proposals and revisions through [SpecDoc](https://specs.netfyr.io/?ns=netfyr%2Fspecs).
 See [Contributing](CONTRIBUTING.md).
